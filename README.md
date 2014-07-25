@@ -1,4 +1,3 @@
-Just type:
 
     usage: ./muse mountpoint [options]
 
