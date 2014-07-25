@@ -1,11 +1,12 @@
 /*
   FUSE: Filesystem in Userspace
   Copyright (C) 2001-2007  Miklos Szeredi <miklos@szeredi.hu>
+  Copyright (C) 2011       Sebastian Pipping <sebastian@pipping.org>
 
   This program can be distributed under the terms of the GNU GPL.
   See the file COPYING.
 
-  gcc -Wall `pkg-config fuse --cflags --libs` fusexmp.c -o fusexmp
+  gcc -Wall fusexmp.c `pkg-config fuse --cflags --libs` -o fusexmp
 */
 
 #define FUSE_USE_VERSION 26
@@ -15,15 +16,17 @@
 #endif
 
 #ifdef linux
-/* For pread()/pwrite() */
-#define _XOPEN_SOURCE 500
+/* For pread()/pwrite()/utimensat() */
+#define _XOPEN_SOURCE 700
 #endif
 
 #include <fuse.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/stat.h>
 #include <dirent.h>
 #include <errno.h>
 #include <sys/time.h>
@@ -31,71 +34,50 @@
 #include <sys/xattr.h>
 #endif
 
-//For V3Mfuse: kent
-#include <stdlib.h>
-#include <strings.h>
-#include <sys/fcntl.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <arpa/inet.h>
-
-int   path_len=1024;
-char* mountp;
-char* apath;
-//char* v3m_host;
-//int v3m_port = 151515;
-// end
+char mount_point[256];
 
 
 
-static char*  mountpt(const char* path)
+static int muse_convert_to_access_path(char *apath, const char *path)
 {
-  strcpy(apath, mountp);
-  strcat(apath, path);
-  return apath;
-  //  return connect_str(mountp, path);
+  sprintf(apath, "%s%s", mount_point, path);
+  fprintf(stderr, "Mount Path: %s\n", apath);
+  return 0;
 }
 
-static int xmp_getattr(const char *path, struct stat *stbuf)
+static int muse_getattr(const char *path, struct stat *stbuf)
 {
 	int res;
-
-	//added: kent
-	path = mountpt(path);
-	// end
-	res = lstat(path, stbuf);
+	char access_path[256];
+	
+	muse_convert_to_access_path(access_path, path);
+	res = lstat(access_path, stbuf);
 	if (res == -1)
 		return -errno;
 
 	return 0;
 }
 
-static int xmp_access(const char *path, int mask)
+static int muse_access(const char *path, int mask)
 {
 	int res;
-
-	//added: kent
-	path = mountpt(path);
-	// end
-
-	res = access(path, mask);
+	char access_path[256];
+	
+	muse_convert_to_access_path(access_path, path);
+	res = access(access_path, mask);
 	if (res == -1)
 		return -errno;
 
 	return 0;
 }
 
-static int xmp_readlink(const char *path, char *buf, size_t size)
+static int muse_readlink(const char *path, char *buf, size_t size)
 {
 	int res;
-
-	//added: kent
-	path = mountpt(path);
-	// end
-
-	res = readlink(path, buf, size - 1);
+	char access_path[256];
+	
+	muse_convert_to_access_path(access_path, path);
+	res = readlink(access_path, buf, size - 1);
 	if (res == -1)
 		return -errno;
 
@@ -104,20 +86,20 @@ static int xmp_readlink(const char *path, char *buf, size_t size)
 }
 
 
-static int xmp_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
+static int muse_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 		       off_t offset, struct fuse_file_info *fi)
 {
 	DIR *dp;
 	struct dirent *de;
-        
+
 	(void) offset;
 	(void) fi;
 
-	//added: kent
-	path = mountpt(path);
-	// end
+	char access_path[256];
+	
+	muse_convert_to_access_path(access_path, path);
 
-	dp = opendir(path);
+	dp = opendir(access_path);
 	if (dp == NULL)
 		return -errno;
 
@@ -134,205 +116,177 @@ static int xmp_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 	return 0;
 }
 
-static int xmp_mknod(const char *path, mode_t mode, dev_t rdev)
+static int muse_mknod(const char *path, mode_t mode, dev_t rdev)
 {
 	int res;
-
-	//added: kent
-	path = mountpt(path);
-	// end
+	char access_path[256];
+	
+	muse_convert_to_access_path(access_path, path);
 
 	/* On Linux this could just be 'mknod(path, mode, rdev)' but this
 	   is more portable */
 	if (S_ISREG(mode)) {
-		res = open(path, O_CREAT | O_EXCL | O_WRONLY, mode);
+		res = open(access_path, O_CREAT | O_EXCL | O_WRONLY, mode);
 		if (res >= 0)
 			res = close(res);
 	} else if (S_ISFIFO(mode))
-		res = mkfifo(path, mode);
+		res = mkfifo(access_path, mode);
 	else
-		res = mknod(path, mode, rdev);
+		res = mknod(access_path, mode, rdev);
 	if (res == -1)
 		return -errno;
 
 	return 0;
 }
 
-static int xmp_mkdir(const char *path, mode_t mode)
+static int muse_mkdir(const char *path, mode_t mode)
 {
 	int res;
-
-	//added: kent
-	path = mountpt(path);
-	// end
-
-	res = mkdir(path, mode);
+	char access_path[256];
+	
+	muse_convert_to_access_path(access_path, path);
+	res = mkdir(access_path, mode);
 	if (res == -1)
 		return -errno;
 
 	return 0;
 }
 
-static int xmp_unlink(const char *path)
+static int muse_unlink(const char *path)
 {
 	int res;
-
-	//added: kent
-	path = mountpt(path);
-	// end
-
-	res = unlink(path);
+	char access_path[256];
+	
+	muse_convert_to_access_path(access_path, path);
+	res = unlink(access_path);
 	if (res == -1)
 		return -errno;
 
 	return 0;
 }
 
-static int xmp_rmdir(const char *path)
+static int muse_rmdir(const char *path)
 {
 	int res;
-
-	//added: kent
-	path = mountpt(path);
-	// end
-
-	res = rmdir(path);
+	char access_path[256];
+	
+	muse_convert_to_access_path(access_path, path);
+	res = rmdir(access_path);
 	if (res == -1)
 		return -errno;
 
 	return 0;
 }
 
-static int xmp_symlink(const char *from, const char *to)
+static int muse_symlink(const char *from, const char *to)
 {
 	int res;
 
-	//added: kent	
-	//	char afrom[256]=".";
-	char ato[256]=".";
-	//	strcat(afrom, from);
-
+	char ato[256] = ".";
 	strcat(ato, to);
 
 	res = symlink(from, ato);
-	// endcd
-
 	if (res == -1)
 		return -errno;
 
 	return 0;
 }
 
-static int xmp_rename(const char *from, const char *to)
+static int muse_rename(const char *from, const char *to)
 {
 	int res;
-	
 
-	//added: kent
 	char afrom[256]=".";
 	char ato[256]=".";
 	strcat(afrom, from);
 	strcat(ato, to);
-	res = rename(afrom, ato);
-	// end
 
+	res = rename(from, to);
 	if (res == -1)
-	  return -errno;
+		return -errno;
+
 	return 0;
 }
 
-static int xmp_link(const char *from, const char *to)
+static int muse_link(const char *from, const char *to)
 {
 	int res;
 
-	//added: kent	
 	char afrom[256]=".";
 	char ato[256]=".";
 	strcat(afrom, from);
 	strcat(ato, to);
+
 	res = link(afrom, ato);
-	// end
-
 	if (res == -1)
 		return -errno;
 
 	return 0;
 }
 
-static int xmp_chmod(const char *path, mode_t mode)
+static int muse_chmod(const char *path, mode_t mode)
 {
 	int res;
+	char access_path[256];
+	
+	muse_convert_to_access_path(access_path, path);
 
-	//added: kent
-	path = mountpt(path);
-	// end
-
-	res = chmod(path, mode);
+	res = chmod(access_path, mode);
 	if (res == -1)
 		return -errno;
 
 	return 0;
 }
 
-static int xmp_chown(const char *path, uid_t uid, gid_t gid)
+static int muse_chown(const char *path, uid_t uid, gid_t gid)
 {
 	int res;
-
-	//added: kent
-	path = mountpt(path);
-	// end
-
-	res = lchown(path, uid, gid);
+	char access_path[256];
+	
+	muse_convert_to_access_path(access_path, path);
+	res = lchown(access_path, uid, gid);
 	if (res == -1)
 		return -errno;
 
 	return 0;
 }
 
-static int xmp_truncate(const char *path, off_t size)
+static int muse_truncate(const char *path, off_t size)
 {
 	int res;
-
-	//added: kent
-	path = mountpt(path);
-	// end
-
-	res = truncate(path, size);
+	char access_path[256];
+	
+	muse_convert_to_access_path(access_path, path);
+	res = truncate(access_path, size);
 	if (res == -1)
 		return -errno;
 
 	return 0;
 }
 
-static int xmp_utimens(const char *path, const struct timespec ts[2])
+#ifdef HAVE_UTIMENSAT
+static int muse_utimens(const char *path, const struct timespec ts[2])
 {
 	int res;
-	struct timeval tv[2];
-
-	//added: kent
-	path = mountpt(path);
-	// end
-
-	tv[0].tv_sec = ts[0].tv_sec;
-	tv[0].tv_usec = ts[0].tv_nsec / 1000;
-	tv[1].tv_sec = ts[1].tv_sec;
-	tv[1].tv_usec = ts[1].tv_nsec / 1000;
-
-	res = utimes(path, tv);
+	char access_path[256];
+	
+	muse_convert_to_access_path(access_path, path);
+	/* don't use utime/utimes since they follow symlinks */
+	res = utimensat(0, access_path, ts, AT_SYMLINK_NOFOLLOW);
 	if (res == -1)
 		return -errno;
 
 	return 0;
 }
+#endif
 
-
-
-static int xmp_open(const char *path, struct fuse_file_info *fi)
+static int muse_open(const char *path, struct fuse_file_info *fi)
 {
-
 	int res;
-	path = mountpt(path);
-	res = open(path, fi->flags);
+	char access_path[256];
+	
+	muse_convert_to_access_path(access_path, path);
+	res = open(access_path, fi->flags);
 	if (res == -1)
 		return -errno;
 
@@ -340,57 +294,51 @@ static int xmp_open(const char *path, struct fuse_file_info *fi)
 	return 0;
 }
 
-
-
-
-
-static int xmp_read(const char *path, char *buf, size_t size, off_t offset,
+static int muse_read(const char *path, char *buf, size_t size, off_t offset,
 		    struct fuse_file_info *fi)
 {
 	int fd;
 	int res;
 
 	(void) fi;
-
-	//added: kent
-	path = mountpt(path);
-	// end
-
-	fd = open(path, O_RDONLY);
+	char access_path[256];
+	
+	muse_convert_to_access_path(access_path, path);
+	fd = open(access_path, O_RDONLY);
 	if (fd == -1)
 		return -errno;
 
 	res = pread(fd, buf, size, offset);
 	if (res == -1)
 		res = -errno;
-	//	printf("buf:%s\n",buf);
+
 	printf("%d\t",fuse_get_context()->uid);
 	printf("%d\t",fuse_get_context()->pid);
-	printf("%s\t",path);
+	printf("%s\t",access_path);
 	printf("%d\t%d\t",(int)offset,(int)offset+res);
 	printf("r\n");
 	close(fd);
 	return res;
 }
 
-static int xmp_write(const char *path, const char *buf, size_t size,
+static int muse_write(const char *path, const char *buf, size_t size,
 		     off_t offset, struct fuse_file_info *fi)
 {
 	int fd;
 	int res;
 
 	(void) fi;
-
-	//added: kent
-	path = mountpt(path);
-	// end
-	fd = open(path, O_WRONLY);
+	char access_path[256];
+	
+	muse_convert_to_access_path(access_path, path);
+	fd = open(access_path, O_WRONLY);
 	if (fd == -1)
 		return -errno;
 
 	res = pwrite(fd, buf, size, offset);
 	if (res == -1)
 		res = -errno;
+
 	printf("%d\t",fuse_get_context()->uid);
 	printf("%d\t",fuse_get_context()->pid);
 	printf("%s\t",path);
@@ -400,65 +348,30 @@ static int xmp_write(const char *path, const char *buf, size_t size,
 	return res;
 }
 
-static int xmp_statfs(const char *path, struct statvfs *stbuf)
+static int muse_statfs(const char *path, struct statvfs *stbuf)
 {
 	int res;
-
-	//added: kent
-	path = mountpt(path);
-	// end
-
-	res = statvfs(path, stbuf);
+	char access_path[256];
+	
+	muse_convert_to_access_path(access_path, path);
+	res = statvfs(access_path, stbuf);
 	if (res == -1)
 		return -errno;
 
 	return 0;
 }
 
-static int xmp_flush(const char *path, struct fuse_file_info *fi)
-{
-  int res;
-  (void) path;
-  //  printf("===FLUSH===: %s ===\n", path);      
-  res = close(dup(fi->fh));
-  if (res == -1)
-    return -errno;
-  // printf("===FLUSH===: %s ===\n", path);      
-  return 0;
-}
-
-
-
-static int xmp_release(const char *path, struct fuse_file_info *fi)
+static int muse_release(const char *path, struct fuse_file_info *fi)
 {
 	/* Just a stub.	 This method is optional and can safely be left
 	   unimplemented */
-        
+
 	(void) path;
-        // added: kent
-	//        printf("===RELEASE===: %s ===\n", path);
-	close(fi->fh);
-	// end
-	//        printf("===RELEASE===: %s ===\n", path);
+	(void) fi;
 	return 0;
 }
 
-static inline DIR *get_dirp(struct fuse_file_info *fi)
-{
-  return (DIR *) (uintptr_t) fi->fh;
-}
-
-static int xmp_releasedir(const char *path, struct fuse_file_info *fi)
-{
-  DIR *dp = get_dirp(fi);
-  (void) path;
-  //  printf("===RELEASEDIR===: %s ===\n", path);
-  closedir(dp);
-  //  printf("===RELEASEDIR===: %s ===\n", path);
-  return 0;
-}
-
-static int xmp_fsync(const char *path, int isdatasync,
+static int muse_fsync(const char *path, int isdatasync,
 		     struct fuse_file_info *fi)
 {
 	/* Just a stub.	 This method is optional and can safely be left
@@ -470,109 +383,128 @@ static int xmp_fsync(const char *path, int isdatasync,
 	return 0;
 }
 
+#ifdef HAVE_POSIX_FALLOCATE
+static int muse_fallocate(const char *path, int mode,
+			off_t offset, off_t length, struct fuse_file_info *fi)
+{
+	int fd;
+	int res;
+
+	(void) fi;
+	char access_path[256];
+	
+	muse_convert_to_access_path(access_path, path);
+	if (mode)
+		return -EOPNOTSUPP;
+
+	fd = open(access_path, O_WRONLY);
+	if (fd == -1)
+		return -errno;
+
+	res = -posix_fallocate(fd, offset, length);
+
+	close(fd);
+	return res;
+}
+#endif
+
 #ifdef HAVE_SETXATTR
 /* xattr operations are optional and can safely be left unimplemented */
-static int xmp_setxattr(const char *path, const char *name, const char *value,
+static int muse_setxattr(const char *path, const char *name, const char *value,
 			size_t size, int flags)
 {
-  int res;
-	//added: kent
-	path = mountpt(path);
-	// end
-
-	res = lsetxattr(path, name, value, size, flags);
+	char access_path[256];
+	
+	muse_convert_to_access_path(access_path, path);
+	int res = lsetxattr(access_path, name, value, size, flags);
 	if (res == -1)
 		return -errno;
 	return 0;
 }
 
-static int xmp_getxattr(const char *path, const char *name, char *value,
+static int muse_getxattr(const char *path, const char *name, char *value,
 			size_t size)
 {
-  int res;
-	//added: kent
-	path = mountpt(path);
-	// end
-	res = lgetxattr(path, name, value, size);
+	char access_path[256];
+	
+	muse_convert_to_access_path(access_path, path);
+	int res = lgetxattr(access_path, name, value, size);
 	if (res == -1)
 		return -errno;
 	return res;
 }
 
-static int xmp_listxattr(const char *path, char *list, size_t size)
+static int muse_listxattr(const char *path, char *list, size_t size)
 {
-  int res;	
-        //added: kent
-	path = mountpt(path);
-	// end
-	res = llistxattr(path, list, size);
+	char access_path[256];
+	
+	muse_convert_to_access_path(access_path, path);
+	int res = llistxattr(access_path, list, size);
 	if (res == -1)
 		return -errno;
 	return res;
 }
 
-static int xmp_removexattr(const char *path, const char *name)
+static int muse_removexattr(const char *path, const char *name)
 {
-  int res;
-	//added: kent
-	path = mountpt(path);
-	// end
-	res = lremovexattr(path, name);
+	char access_path[256];
+	
+	muse_convert_to_access_path(access_path, path);
+	int res = lremovexattr(access_path, name);
 	if (res == -1)
 		return -errno;
 	return 0;
 }
 #endif /* HAVE_SETXATTR */
 
-static struct fuse_operations xmp_oper = {
-	.getattr	= xmp_getattr,
-	.access		= xmp_access,
-	.readlink	= xmp_readlink,
-	.readdir	= xmp_readdir,
-	.mknod		= xmp_mknod,
-	.mkdir		= xmp_mkdir,
-	.symlink	= xmp_symlink,
-	.unlink		= xmp_unlink,
-	.rmdir		= xmp_rmdir,
-	.rename		= xmp_rename,
-	.link		= xmp_link,
-	.chmod		= xmp_chmod,
-	.chown		= xmp_chown,
-	.truncate	= xmp_truncate,
-	.utimens	= xmp_utimens,
-	.open		= xmp_open,
-	.read		= xmp_read,
-	.write		= xmp_write,
-	.statfs		= xmp_statfs,
-        .flush          = xmp_flush,
-	.release	= xmp_release,
-	.releasedir     = xmp_releasedir,
-	.fsync		= xmp_fsync,
-#ifdef HAVE_SETXATTR
-	.setxattr	= xmp_setxattr,
-	.getxattr	= xmp_getxattr,
-	.listxattr	= xmp_listxattr,
-	.removexattr	= xmp_removexattr,
+static struct fuse_operations muse_oper = {
+	.getattr	= muse_getattr,
+	.access		= muse_access,
+	.readlink	= muse_readlink,
+	.readdir	= muse_readdir,
+	.mknod		= muse_mknod,
+	.mkdir		= muse_mkdir,
+	.symlink	= muse_symlink,
+	.unlink		= muse_unlink,
+	.rmdir		= muse_rmdir,
+	.rename		= muse_rename,
+	.link		= muse_link,
+	.chmod		= muse_chmod,
+	.chown		= muse_chown,
+	.truncate	= muse_truncate,
+#ifdef HAVE_UTIMENSAT
+	.utimens	= muse_utimens,
 #endif
-
+	.open		= muse_open,
+	.read		= muse_read,
+	.write		= muse_write,
+	.statfs		= muse_statfs,
+	.release	= muse_release,
+	.fsync		= muse_fsync,
+#ifdef HAVE_POSIX_FALLOCATE
+	.fallocate	= muse_fallocate,
+#endif
+#ifdef HAVE_SETXATTR
+	.setxattr	= muse_setxattr,
+	.getxattr	= muse_getxattr,
+	.listxattr	= muse_listxattr,
+	.removexattr	= muse_removexattr,
+#endif
 };
 
 int main(int argc, char *argv[])
 {
-  //editor: kent
-
-  int i;
-  mountp = malloc(sizeof(char)*path_len);
-  strcat(mountp,argv[1]);
-  printf("mountpoint=%s\n",mountp);
-  for (i=2; i < argc; i++) {
-    argv[i-1] = argv[i];
+  char *mount;
+  mount = argv[1];
+  if (argc == 1) {
+    fprintf(stderr, "use 'muse -h' for help\n");
+    exit(1);
   }
-  argc--;
-  apath = malloc(sizeof(char)*path_len);
+  
+  if (realpath(mount, mount_point) != NULL ){
+    fprintf(stderr, "mount_point=%s\n", mount_point);
+  }
 
-  chdir(mountp);
   umask(0);
-  return fuse_main(argc, argv, &xmp_oper, NULL);
-  // end
+  return fuse_main(argc, argv, &muse_oper, NULL);
 }
