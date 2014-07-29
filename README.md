@@ -1,12 +1,14 @@
-mount_point=/home/kento/repos/muse/mnt
-usage: ./muse mountpoint [options]
+
+    usage: ./muse mountpoint [options]
 
 general options:
+
     -o opt,[opt...]        mount options
     -h   --help            print help
     -V   --version         print version
 
 FUSE options:
+
     -d   -o debug          enable debug output (implies -f)
     -f                     foreground operation
     -s                     disable multi-threaded operation
@@ -48,9 +50,11 @@ FUSE options:
 Module options:
 
 [subdir]
+
     -o subdir=DIR	    prepend this directory to all paths (mandatory)
     -o [no]rellinks	    transform absolute symlinks to relative
 
 [iconv]
+
     -o from_code=CHARSET   original encoding of file names (default: UTF-8)
     -o to_code=CHARSET	    new encoding of the file names (default: ANSI_X3.4-1968)
