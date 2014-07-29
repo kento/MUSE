@@ -30,13 +30,15 @@
 #include <dirent.h>
 #include <errno.h>
 #include <sys/time.h>
+
 #ifdef HAVE_SETXATTR
 #include <sys/xattr.h>
 #endif
 
+#include "muse_err.h"
+#include "muse_log.h"
+
 char mount_point[256];
-
-
 
 static int muse_convert_to_access_path(char *apath, const char *path)
 {
@@ -286,6 +288,7 @@ static int muse_open(const char *path, struct fuse_file_info *fi)
 	char access_path[256];
 	
 	muse_convert_to_access_path(access_path, path);
+	
 	res = open(access_path, fi->flags);
 	if (res == -1)
 		return -errno;
@@ -312,11 +315,8 @@ static int muse_read(const char *path, char *buf, size_t size, off_t offset,
 	if (res == -1)
 		res = -errno;
 
-	printf("%d\t",fuse_get_context()->uid);
-	printf("%d\t",fuse_get_context()->pid);
-	printf("%s\t",access_path);
-	printf("%d\t%d\t",(int)offset,(int)offset+res);
-	printf("r\n");
+	muse_log_write(fuse_get_context()->pid, access_path, offset, res, "r");
+
 	close(fd);
 	return res;
 }
@@ -339,11 +339,8 @@ static int muse_write(const char *path, const char *buf, size_t size,
 	if (res == -1)
 		res = -errno;
 
-	printf("%d\t",fuse_get_context()->uid);
-	printf("%d\t",fuse_get_context()->pid);
-	printf("%s\t",path);
-	printf("%d\t%d\t",(int)offset,(int)offset+res);
-	printf("w\n");
+	muse_log_write(fuse_get_context()->pid, access_path, offset, res, "w");
+
 	close(fd);
 	return res;
 }
@@ -494,7 +491,12 @@ static struct fuse_operations muse_oper = {
 
 int main(int argc, char *argv[])
 {
+  int i;
   char *mount;
+
+  muse_err_init(0);
+  muse_log_open("./log");
+  
   mount = argv[1];
   if (argc == 1) {
     fprintf(stderr, "use 'muse -h' for help\n");
@@ -504,6 +506,11 @@ int main(int argc, char *argv[])
   if (realpath(mount, mount_point) != NULL ){
     fprintf(stderr, "mount_point=%s\n", mount_point);
   }
+
+  for (i = 2; i < argc; i++) {
+    argv[i - 1] = argv[i];
+  }
+  argc--;
 
   umask(0);
   return fuse_main(argc, argv, &muse_oper, NULL);

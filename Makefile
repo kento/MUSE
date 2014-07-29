@@ -1,12 +1,12 @@
 
-muse_OBJS = muse.o
+muse_OBJS = muse.o muse_log.o muse_io.o muse_err.o
 muse_PROGRAM = muse
 
 PROGRAMS= $(muse_PROGRAM)
 OBJS= $(muse_OBJS)
 
 CC = gcc
-LDFLAGS = -I/usr/include/ -L/usr/lib64/ -pthread -lfuse -lrt -ldl
+LDFLAGS = -I./ -I/usr/include/ -L/usr/lib64/ -pthread -lfuse -lrt -ldl
 CFLAGS = -Wall -O2 -D_FILE_OFFSET_BITS=64
 
 
