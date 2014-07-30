@@ -8,6 +8,8 @@ Log format:
 
     <Time Stamp (seconds)> <pid> <Open(o),Close(c),Write(w),Read(r)> <File path> <Offset> <Size>
 
+
+
     1406690112.019573       21635   o       /home/kento/repos/muse/root_dir/muse_test1.tmp  0       0
     1406690112.020497       21635   w       /home/kento/repos/muse/root_dir/muse_test1.tmp  0       512
     1406690112.021343       21635   w       /home/kento/repos/muse/root_dir/muse_test1.tmp  512     512
