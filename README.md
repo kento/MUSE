@@ -1,6 +1,6 @@
-
 MUSE (Monitoring Filesystem in Userspace)
 =========================================
+
 
 
 usage: ./muse mountpoint [options]
@@ -62,3 +62,86 @@ Module options:
 
     -o from_code=CHARSET   original encoding of file names (default: UTF-8)
     -o to_code=CHARSET	    new encoding of the file names (default: ANSI_X3.4-1968)
+
+
+Multi-level Asynchronous Checkpoint/Restart Model (MACR)
+====================================
+This code simulate Multi-level Checkpoint/Restart
+
+MACR APIs & Variables
+-----------------------
+## APIs
+
+### X state computation
+    tuple computeWState(L, V, T, ckptOverheadTimes, ckptRestartTimes, failRates)
+This function compute X state based on given a configuration. Current function supports only 2-level case    
+
+* `L` [input]: Maximal checkpoint level 
+    * Example: 2
+* `V` [input]: Array of checkpoint intervals [Level 1 count, Level 2 count (=1)] 
+    * Example: [4, 1]
+* `T` [intput]: Lowest level checkpoint interval
+    * Example: 60
+* `ckptOverheadTimes` [input]: Array of checkpoint overhead time [Level 1 checkpoint overhead, Level 2 checkpoint overhead] 
+    * Example: [5.0, 100.0])   
+* `ckptRestartTimes` [input]: Array of restart times [Level 1 restart, Level 2 restart] 
+    * Example:  [10.0, 100.0]
+* `failRates` [input]: Array of failure rates [Level 1 failure rate, Level 2 failure rate] 
+    * Example:  [2.13e-06, 4.27e-07]
+* `tuple` [output]: (Expected runtime, Efficiency).
+    * Example: 420.122295693 0.714077788957
+    
+![Alt text](https://bitbucket.org/sato5/mcr_model/wiki/img/computeXState.png)
+![Alt text](https://bitbucket.org/sato5/mcr_model/wiki/img/optimizeXState.png)
+
+### W state computation
+    tuple computeWState(L, V, T, ckptOverheadTimes, ckptL2Latency, ckptRestartTimes, failRates, alpha)
+This function compute W state based on given a configuration. Current function supports only 2-level case    
+
+* `L` [input]: Maximal checkpoint level 
+    * Example: 2
+* `V` [input]: Array of checkpoint intervals [Level 1 count, Level 2 count (=1)] 
+    * Example: [4, 1]
+* `T` [intput]: Lowest level checkpoint interval
+    * Example: 60
+* `ckptOverheadTimes` [input]: Array of checkpoint overhead time [Level 1 checkpoint overhead, Level 2 checkpoint overhead] 
+    * Example: [5.0, 5.0])   
+* `ckptL2Latency` [input]: Level 2 checkpoint latency time 
+    * Example: 100.0
+* `ckptRestartTimes` [input]: Array of restart times [Level 1 restart, Level 2 restart] 
+    * Example:  [10.0, 100.0]
+* `failRates` [input]: Array of failure rates [Level 1 failure rate, Level 2 failure rate] 
+    * Example:  [2.13e-06, 4.27e-07]
+* `alpha` [input]: Overhead factor incurred by Asynchronous L2 checkpointing (Overhead ratio to computation) 
+    * Example: 0.01
+* `tuple` [output]: (Expected runtime, Efficiency, Segment A count). If no answer, returns (inf, 0, None).
+    * Example: 326.887714958 0.917746327783 2.0
+    
+![Alt text](https://bitbucket.org/sato5/mcr_model/wiki/img/computeWState.png)
+![Alt text](https://bitbucket.org/sato5/mcr_model/wiki/img/optimizeWState.png)
+
+### W state simulation
+    tuple computeWState(L, V, T, ckptOverheadTimes, ckptL2Latency, ckptRestartTimes, failRates, alpha)
+This function simulate W state based on given a configuration. Current function supports only 2-level case    
+
+* `L` [input]: Maximal checkpoint level 
+    * Example: 2
+* `V` [input]: Array of checkpoint intervals [Level 1 count, Level 2 count (=1)] 
+    * Example: [4, 1]
+* `T` [intput]: Lowest level checkpoint interval
+    * Example: 60
+* `ckptOverheadTimes` [input]: Array of checkpoint overhead time [Level 1 checkpoint overhead, Level 2 checkpoint overhead] 
+    * Example: [5.0, 5.0])   
+* `ckptL2Latency` [input]: Level 2 checkpoint latency time 
+    * Example: 100.0
+* `ckptRestartTimes` [input]: Array of restart times [Level 1 restart, Level 2 restart] 
+    * Example:  [10.0, 100.0]
+* `failRates` [input]: Array of failure rates [Level 1 failure rate, Level 2 failure rate] 
+    * Example:  [2.13e-06, 4.27e-07]
+* `alpha` [input]: Overhead factor incurred by Asynchronous L2 checkpointing (Overhead ratio to computation) 
+    * Example: 0.01
+* `tuple` [output]: (Expected runtime, Efficiency, Segment A count). If no answer, returns (inf, 0, None).
+    * Example: 326.887714958 0.917746327783 2.0 (the result varies each time because the simulation is not deterministic)
+
+![Alt text](https://bitbucket.org/sato5/mcr_model/wiki/img/simulateWState-example.png)
+![Alt text](https://bitbucket.org/sato5/mcr_model/wiki/img/simulateWState.png)
