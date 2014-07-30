@@ -44,11 +44,11 @@ Log format: (pid = 0 when close)
 Usage
 -----------
 
-# Command
+## Command
     usage: muse <log file> <root dir> <mount point> [Fuse options]
 
 
-#  Fuse options
+##  Fuse options
 general options:
 
     -o opt,[opt...]        mount options
@@ -95,7 +95,7 @@ FUSE options:
     -o big_writes          enable larger than 4kB writes
     -o no_remote_lock      disable remote file locking
 
-Module options:
+## Module options:
 
 [subdir]
 
@@ -106,3 +106,5 @@ Module options:
 
     -o from_code=CHARSET   original encoding of file names (default: UTF-8)
     -o to_code=CHARSET	    new encoding of the file names (default: ANSI_X3.4-1968)
+    
+    
