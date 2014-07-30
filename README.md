@@ -4,10 +4,16 @@ MUSE (Monitoring Filesystem in Userspace)
 Quick Start
 ------------
 
+    $ cd muse
+    $ make
+    $ mkdir muse_root_dir muse_mnt
+    $ ./muse ./muse_log ./muse_root_dir/ ./muse_mnt/ 
+    $ cat ./muse_log
+
 Log format:
 
     <Time Stamp (seconds)> <pid> <Open(o),Close(c),Write(w),Read(r)> <File path> <Offset> <Size>
-a
+
     1406690112.019573       21635   o       /root_dir/muse_test1.tmp  0       0
     1406690112.020497       21635   w       /root_dir/muse_test1.tmp  0       512
     1406690112.021343       21635   w       /root_dir/muse_test1.tmp  512     512
@@ -30,9 +36,12 @@ a
     1406690112.043920       21642   r       /root_dir/muse_test2.tmp  0       372
     1406690112.044190       0       c       /root_dir/muse_test2.tmp  0       0
 
+Usage
+-----------
+# Command
+usage: muse <log file> <root dir> <mount point> [Fuse options]
 
-usage: ./muse mountpoint [options]
-
+#  Fuse options
 general options:
 
     -o opt,[opt...]        mount options
