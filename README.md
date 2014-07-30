@@ -6,28 +6,29 @@ Quick Start
 
 Log format:
 
-    1406690112.019573       21635   o       /home/kento/repos/muse/root_dir/muse_test1.tmp  0       0
- 1406690112.020497       21635   w       /home/kento/repos/muse/root_dir/muse_test1.tmp  0       512
- 1406690112.021343       21635   w       /home/kento/repos/muse/root_dir/muse_test1.tmp  512     512
-1406690112.022277       21635   w       /home/kento/repos/muse/root_dir/muse_test1.tmp  1024    512
-1406690112.023120       21635   w       /home/kento/repos/muse/root_dir/muse_test1.tmp  1536    512
-1406690112.023753       0       c       /home/kento/repos/muse/root_dir/muse_test1.tmp  0       0
-1406690112.026105       21636   o       /home/kento/repos/muse/root_dir/muse_test1.tmp  0       0
-1406690112.026716       21636   r       /home/kento/repos/muse/root_dir/muse_test1.tmp  0       2048
-1406690112.027104       0       c       /home/kento/repos/muse/root_dir/muse_test1.tmp  0       0
-1406690112.030754       21634   o       /home/kento/repos/muse/root_dir/muse_test2.tmp  0       0
-1406690112.033202       21638   w       /home/kento/repos/muse/root_dir/muse_test2.tmp  0       124
-1406690112.034230       0       c       /home/kento/repos/muse/root_dir/muse_test2.tmp  0       0
-1406690112.034678       21634   o       /home/kento/repos/muse/root_dir/muse_test2.tmp  0       0
-1406690112.036899       21640   w       /home/kento/repos/muse/root_dir/muse_test2.tmp  124     124
-1406690112.037982       0       c       /home/kento/repos/muse/root_dir/muse_test2.tmp  0       0
-1406690112.038304       21634   o       /home/kento/repos/muse/root_dir/muse_test2.tmp  0       0
-1406690112.040553       21641   w       /home/kento/repos/muse/root_dir/muse_test2.tmp  248     124
-1406690112.041589       0       c       /home/kento/repos/muse/root_dir/muse_test2.tmp  0       0
-1406690112.043288       21642   o       /home/kento/repos/muse/root_dir/muse_test2.tmp  0       0
-1406690112.043920       21642   r       /home/kento/repos/muse/root_dir/muse_test2.tmp  0       372
-1406690112.044190       0       c       /home/kento/repos/muse/root_dir/muse_test2.tmp  0       0
+    <Time Stamp (seconds)> <pid> <Open(o),Close(c),Write(w),Read(r)> <File path> <Offset> <Size>
 
+    1406690112.019573       21635   o       /home/kento/repos/muse/root_dir/muse_test1.tmp  0       0
+    1406690112.020497       21635   w       /home/kento/repos/muse/root_dir/muse_test1.tmp  0       512
+    1406690112.021343       21635   w       /home/kento/repos/muse/root_dir/muse_test1.tmp  512     512
+    1406690112.022277       21635   w       /home/kento/repos/muse/root_dir/muse_test1.tmp  1024    512
+    1406690112.023120       21635   w       /home/kento/repos/muse/root_dir/muse_test1.tmp  1536    512
+    1406690112.023753       0       c       /home/kento/repos/muse/root_dir/muse_test1.tmp  0       0
+    1406690112.026105       21636   o       /home/kento/repos/muse/root_dir/muse_test1.tmp  0       0
+    1406690112.026716       21636   r       /home/kento/repos/muse/root_dir/muse_test1.tmp  0       2048
+    1406690112.027104       0       c       /home/kento/repos/muse/root_dir/muse_test1.tmp  0       0
+    1406690112.030754       21634   o       /home/kento/repos/muse/root_dir/muse_test2.tmp  0       0
+    1406690112.033202       21638   w       /home/kento/repos/muse/root_dir/muse_test2.tmp  0       124
+    1406690112.034230       0       c       /home/kento/repos/muse/root_dir/muse_test2.tmp  0       0
+    1406690112.034678       21634   o       /home/kento/repos/muse/root_dir/muse_test2.tmp  0       0
+    1406690112.036899       21640   w       /home/kento/repos/muse/root_dir/muse_test2.tmp  124     124
+    1406690112.037982       0       c       /home/kento/repos/muse/root_dir/muse_test2.tmp  0       0
+    1406690112.038304       21634   o       /home/kento/repos/muse/root_dir/muse_test2.tmp  0       0
+    1406690112.040553       21641   w       /home/kento/repos/muse/root_dir/muse_test2.tmp  248     124
+    1406690112.041589       0       c       /home/kento/repos/muse/root_dir/muse_test2.tmp  0       0
+    1406690112.043288       21642   o       /home/kento/repos/muse/root_dir/muse_test2.tmp  0       0
+    1406690112.043920       21642   r       /home/kento/repos/muse/root_dir/muse_test2.tmp  0       372
+    1406690112.044190       0       c       /home/kento/repos/muse/root_dir/muse_test2.tmp  0       0
 
 
 usage: ./muse mountpoint [options]
