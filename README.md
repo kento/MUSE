@@ -42,7 +42,7 @@ Usage
 -----------
 
 # Command
-usage: muse <log file> <root dir> <mount point> [Fuse options]
+    usage: muse <log file> <root dir> <mount point> [Fuse options]
 
 
 #  Fuse options
@@ -103,4 +103,3 @@ Module options:
 
     -o from_code=CHARSET   original encoding of file names (default: UTF-8)
     -o to_code=CHARSET	    new encoding of the file names (default: ANSI_X3.4-1968)
-
