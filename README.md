@@ -10,7 +10,7 @@ Quick Start
     $ ./muse ./muse_log ./muse_root_dir/ ./muse_mnt/ 
     $ cat ./muse_log
 
-Log format:
+Log format: (pid = 0 when close)
 
     <Time Stamp (seconds)> <pid> <Open(o),Close(c),Write(w),Read(r)> <File path> <Offset> <Size>
 
