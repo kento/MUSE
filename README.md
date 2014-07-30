@@ -1,5 +1,9 @@
 
-    usage: ./muse mountpoint [options]
+MUSE (Monitoring Filesystem in Userspace)
+=========================================
+
+
+usage: ./muse mountpoint [options]
 
 general options:
 
