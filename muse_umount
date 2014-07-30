@@ -1,2 +1,4 @@
 #!/bin/sh
-fusermount -u $@
+
+mnt=`mount | grep fuse.muse | awk '{ print $3}'`
+echo fusermount -u $mnt
