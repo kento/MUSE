@@ -44,7 +44,7 @@ void muse_log_write(int pid, char *io_path, size_t offset, size_t length, char *
   double time_stamp;
   
   time_stamp = muse_get_time();
-  sprintf(log, "%f\t%d\t%s\t%lu\t%lu\t%s\n", time_stamp, pid, io_path, offset, length, mode);
+  sprintf(log, "%f\t%d\t%s\t%s\t%lu\t%lu\n", time_stamp, pid, mode, io_path, offset, length);
   muse_write(muse_log_path, muse_log_fd, log, strlen(log));
 
   return;

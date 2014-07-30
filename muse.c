@@ -1,14 +1,3 @@
-/*
-  FUSE: Filesystem in Userspace
-  Copyright (C) 2001-2007  Miklos Szeredi <miklos@szeredi.hu>
-  Copyright (C) 2011       Sebastian Pipping <sebastian@pipping.org>
-
-  This program can be distributed under the terms of the GNU GPL.
-  See the file COPYING.
-
-  gcc -Wall fusexmp.c `pkg-config fuse --cflags --libs` -o fusexmp
-*/
-
 #define FUSE_USE_VERSION 26
 
 #ifdef HAVE_CONFIG_H
@@ -293,6 +282,8 @@ static int muse_open(const char *path, struct fuse_file_info *fi)
 	if (res == -1)
 		return -errno;
 
+	muse_log_write(fuse_get_context()->pid, access_path, 0, 0, "o");
+
 	close(res);
 	return 0;
 }
@@ -362,6 +353,10 @@ static int muse_release(const char *path, struct fuse_file_info *fi)
 {
 	/* Just a stub.	 This method is optional and can safely be left
 	   unimplemented */
+	char access_path[256];
+	
+	muse_convert_to_access_path(access_path, path);
+	muse_log_write(fuse_get_context()->pid, access_path, 0, 0, "c");
 
 	(void) path;
 	(void) fi;
@@ -492,25 +487,27 @@ static struct fuse_operations muse_oper = {
 int main(int argc, char *argv[])
 {
   int i;
+  char *log_file;
   char *mount;
 
+
   muse_err_init(0);
-  muse_log_open("./log");
-  
-  mount = argv[1];
-  if (argc == 1) {
-    fprintf(stderr, "use 'muse -h' for help\n");
+
+  log_file = argv[1];
+  mount = argv[2];
+  if (argc < 4) {
+    fprintf(stderr, "usage: muse <log file> <root dir> <mount point> [Fuse options]\n");
+    fprintf(stderr, "use 'muse -h' for Fuse options\n");
     exit(1);
   }
   
   if (realpath(mount, mount_point) != NULL ){
-    fprintf(stderr, "mount_point=%s\n", mount_point);
+    for (i = 3; i < argc; i++) {
+      argv[i - 2] = argv[i];
+    }
+    argc -= 2;
+    muse_log_open(log_file);  
   }
-
-  for (i = 2; i < argc; i++) {
-    argv[i - 1] = argv[i];
-  }
-  argc--;
 
   umask(0);
   return fuse_main(argc, argv, &muse_oper, NULL);
