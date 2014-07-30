@@ -3,6 +3,8 @@ MUSE (Monitoring Filesystem in Userspace)
 
 The MUSE filesystem monitor open, close, read, write operations including read/write address, and the sizes.
 
+![Alt text](https://bitbucket.org/sato5/muse/wiki/img/muse.png)
+
 
 Quick Start
 ------------
