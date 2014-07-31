@@ -11,6 +11,7 @@ Quick Start
     $ make
     $ mkdir muse_root_dir muse_mnt
     $ ./muse ./muse_log ./muse_root_dir/ ./muse_mnt/ 
+    $ ./muse_test.sh ./muse_mnt
     $ cat ./muse_log
 
 ![Alt text](https://bitbucket.org/sato5/muse/wiki/img/muse.png)
