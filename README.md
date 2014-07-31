@@ -3,8 +3,6 @@ MUSE (Monitoring Filesystem in Userspace)
 
 The MUSE filesystem monitor open, close, read, write operations including read/write address, and the sizes.
 
-![Alt text](https://bitbucket.org/sato5/muse/wiki/img/muse.png)
-
 
 Quick Start
 ------------
@@ -14,6 +12,8 @@ Quick Start
     $ mkdir muse_root_dir muse_mnt
     $ ./muse ./muse_log ./muse_root_dir/ ./muse_mnt/ 
     $ cat ./muse_log
+
+![Alt text](https://bitbucket.org/sato5/muse/wiki/img/muse.png)
 
 
 Log format: (pid = 0 when close)
