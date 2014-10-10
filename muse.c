@@ -275,14 +275,17 @@ static int muse_open(const char *path, struct fuse_file_info *fi)
 {
 	int res;
 	char access_path[256];
-	
+	double start_time, duration_time;
+
+	start_time = muse_get_time();
 	muse_convert_to_access_path(access_path, path);
 	
 	res = open(access_path, fi->flags);
 	if (res == -1)
 		return -errno;
 
-	muse_log_write(fuse_get_context()->pid, access_path, 0, 0, "o");
+	duration_time = muse_get_time() - start_time;
+	muse_log_write(fuse_get_context()->pid, access_path, 0, 0, "o", duration_time);
 
 	close(res);
 	return 0;
@@ -296,6 +299,10 @@ static int muse_read(const char *path, char *buf, size_t size, off_t offset,
 
 	(void) fi;
 	char access_path[256];
+
+	double start_time, duration_time;
+
+	start_time = muse_get_time();
 	
 	muse_convert_to_access_path(access_path, path);
 	fd = open(access_path, O_RDONLY);
@@ -306,7 +313,8 @@ static int muse_read(const char *path, char *buf, size_t size, off_t offset,
 	if (res == -1)
 		res = -errno;
 
-	muse_log_write(fuse_get_context()->pid, access_path, offset, res, "r");
+	duration_time = muse_get_time() - start_time;
+	muse_log_write(fuse_get_context()->pid, access_path, offset, res, "r", duration_time);
 
 	close(fd);
 	return res;
@@ -320,6 +328,10 @@ static int muse_write(const char *path, const char *buf, size_t size,
 
 	(void) fi;
 	char access_path[256];
+
+	double start_time, duration_time;
+
+	start_time = muse_get_time();
 	
 	muse_convert_to_access_path(access_path, path);
 	fd = open(access_path, O_WRONLY);
@@ -330,7 +342,8 @@ static int muse_write(const char *path, const char *buf, size_t size,
 	if (res == -1)
 		res = -errno;
 
-	muse_log_write(fuse_get_context()->pid, access_path, offset, res, "w");
+	duration_time = muse_get_time() - start_time;
+	muse_log_write(fuse_get_context()->pid, access_path, offset, res, "w", duration_time);
 
 	close(fd);
 	return res;
@@ -354,9 +367,15 @@ static int muse_release(const char *path, struct fuse_file_info *fi)
 	/* Just a stub.	 This method is optional and can safely be left
 	   unimplemented */
 	char access_path[256];
+
+	double start_time, duration_time;
+
+	start_time = muse_get_time();
 	
 	muse_convert_to_access_path(access_path, path);
-	muse_log_write(fuse_get_context()->pid, access_path, 0, 0, "c");
+
+	duration_time = muse_get_time() - start_time;
+	muse_log_write(fuse_get_context()->pid, access_path, 0, 0, "c", duration_time);
 
 	(void) path;
 	(void) fi;

@@ -38,13 +38,13 @@ void muse_log_open(char *path) {
   muse_write(muse_log_path, muse_log_fd, log, strlen(log));
 }
 
-void muse_log_write(int pid, char *io_path, size_t offset, size_t length, char *mode)
+void muse_log_write(int pid, char *io_path, size_t offset, size_t length, char *mode, double duration)
 {
   char log[1024];
   double time_stamp;
   
   time_stamp = muse_get_time();
-  sprintf(log, "%f\t%d\t%s\t%s\t%lu\t%lu\n", time_stamp, pid, mode, io_path, offset, length);
+  sprintf(log, "%f\t%f\t%d\t%s\t%s\t%lu\t%lu\n", time_stamp, duration, pid, mode, io_path, offset, length);
   muse_write(muse_log_path, muse_log_fd, log, strlen(log));
 
   return;
