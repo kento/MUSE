@@ -6,7 +6,7 @@ The MUSE filesystem monitor open, close, read, write operations including read/w
 Required software
 ------------
 * FUSE(Filesystem in Userspace): http://fuse.sourceforge.net/ 
-** fuse, fuse-dev
+* fuse, fuse-dev
 
 
 Quick Start
