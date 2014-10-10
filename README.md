@@ -18,6 +18,7 @@ Quick Start
     $ ./muse ./muse_log ./muse_root_dir/ ./muse_mnt/ 
     $ ./muse_test.sh ./muse_mnt
     $ cat ./muse_log
+    $ ./muse_umount # OR sudo umount ./muse_mnt
 
 ![Alt text](https://bitbucket.org/sato5/muse/wiki/img/muse.png)
 
@@ -25,29 +26,29 @@ Quick Start
 Log format: (pid = 0 when close)
 --------------------------------
 
-    <Time Stamp (seconds)> <pid> <Open(o),Close(c),Write(w),Read(r)> <File path> <Offset(bytes)> <Size(bytes)>
+    <Time Stamp (seconds)> <Duration (seconds)> <pid> <Open(o),Close(c),Write(w),Read(r)> <File path> <Offset(bytes)> <Size(bytes)>
 
-    1406690112.019573       21635   o       muse_root_dir/muse_test1.tmp  0       0
-    1406690112.020497       21635   w       muse_root_dir/muse_test1.tmp  0       512
-    1406690112.021343       21635   w       muse_root_dir/muse_test1.tmp  512     512
-    1406690112.022277       21635   w       muse_root_dir/muse_test1.tmp  1024    512
-    1406690112.023120       21635   w       muse_root_dir/muse_test1.tmp  1536    512
-    1406690112.023753       0       c       muse_root_dir/muse_test1.tmp  0       0
-    1406690112.026105       21636   o       muse_root_dir/muse_test1.tmp  0       0
-    1406690112.026716       21636   r       muse_root_dir/muse_test1.tmp  0       2048
-    1406690112.027104       0       c       muse_root_dir/muse_test1.tmp  0       0
-    1406690112.030754       21634   o       muse_root_dir/muse_test2.tmp  0       0
-    1406690112.033202       21638   w       muse_root_dir/muse_test2.tmp  0       124
-    1406690112.034230       0       c       muse_root_dir/muse_test2.tmp  0       0
-    1406690112.034678       21634   o       muse_root_dir/muse_test2.tmp  0       0
-    1406690112.036899       21640   w       muse_root_dir/muse_test2.tmp  124     124
-    1406690112.037982       0       c       muse_root_dir/muse_test2.tmp  0       0
-    1406690112.038304       21634   o       muse_root_dir/muse_test2.tmp  0       0
-    1406690112.040553       21641   w       muse_root_dir/muse_test2.tmp  248     124
-    1406690112.041589       0       c       muse_root_dir/muse_test2.tmp  0       0
-    1406690112.043288       21642   o       muse_root_dir/muse_test2.tmp  0       0
-    1406690112.043920       21642   r       muse_root_dir/muse_test2.tmp  0       372
-    1406690112.044190       0       c       muse_root_dir/muse_test2.tmp  0       0
+    1412899393.685865       0.000409        16061   o       muse_root_dir/muse_test1.tmp      0       0
+    1412899393.686556       0.000333        16061   w       muse_root_dir/muse_test1.tmp      0       512
+    1412899393.717921       0.000202        16061   w       muse_root_dir/muse_test1.tmp      512     512
+    1412899393.718611       0.000152        16061   w       muse_root_dir/muse_test1.tmp      1024    512
+    1412899393.719273       0.000150        16061   w       muse_root_dir/muse_test1.tmp      1536    512
+    1412899393.723505       0.000002        0       c       muse_root_dir/muse_test1.tmp      0       0
+    1412899393.724367       0.000179        16062   o       muse_root_dir/muse_test1.tmp      0       0
+    1412899393.724575       0.000144        16062   r       muse_root_dir/muse_test1.tmp      0       2048
+    1412899393.724607       0.000001        0       c       muse_root_dir/muse_test1.tmp      0       0
+    1412899393.789527       0.000349        16064   o       muse_root_dir/muse_test2.tmp      0       0
+    1412899393.791102       0.000396        16064   w       muse_root_dir/muse_test2.tmp      0       124
+    1412899393.824437       0.000006        0       c       muse_root_dir/muse_test2.tmp      0       0
+    1412899393.825117       0.000230        16065   o       muse_root_dir/muse_test2.tmp      0       0
+    1412899393.825729       0.000200        16065   w       muse_root_dir/muse_test2.tmp      124     124
+    1412899393.826246       0.000002        0       c       muse_root_dir/muse_test2.tmp      0       0
+    1412899393.826604       0.000154        16066   o       muse_root_dir/muse_test2.tmp      0       0
+    1412899393.827853       0.000274        16066   w       muse_root_dir/muse_test2.tmp      248     124
+    1412899393.842867       0.000006        0       c       muse_root_dir/muse_test2.tmp      0       0
+    1412899393.844400       0.000220        16067   o       muse_root_dir/muse_test2.tmp      0       0
+    1412899393.844634       0.000162        16067   r       muse_root_dir/muse_test2.tmp      0       372
+    1412899393.844692       0.000002        0       c       muse_root_dir/muse_test2.tmp      0       0
 
 Usage
 -----------
