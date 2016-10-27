@@ -287,14 +287,15 @@ static int muse_open(const char *path, struct fuse_file_info *fi)
 	duration_time = muse_get_time() - start_time;
 	muse_log_write(fuse_get_context()->pid, access_path, 0, 0, "o", duration_time);
 
-	close(res);
+	//close(res);
+	fi->fh=res;
 	return 0;
 }
 
 static int muse_read(const char *path, char *buf, size_t size, off_t offset,
 		    struct fuse_file_info *fi)
 {
-	int fd;
+	int fd=fi->fh;
 	int res;
 
 	(void) fi;
@@ -305,9 +306,9 @@ static int muse_read(const char *path, char *buf, size_t size, off_t offset,
 	start_time = muse_get_time();
 	
 	muse_convert_to_access_path(access_path, path);
-	fd = open(access_path, O_RDONLY);
+	/*fd = open(access_path, O_RDONLY);
 	if (fd == -1)
-		return -errno;
+		return -errno;*/
 
 	res = pread(fd, buf, size, offset);
 	if (res == -1)
@@ -316,14 +317,14 @@ static int muse_read(const char *path, char *buf, size_t size, off_t offset,
 	duration_time = muse_get_time() - start_time;
 	muse_log_write(fuse_get_context()->pid, access_path, offset, res, "r", duration_time);
 
-	close(fd);
+	//close(fd);
 	return res;
 }
 
 static int muse_write(const char *path, const char *buf, size_t size,
 		     off_t offset, struct fuse_file_info *fi)
 {
-	int fd;
+	int fd=fi->fh;
 	int res;
 
 	(void) fi;
@@ -334,9 +335,9 @@ static int muse_write(const char *path, const char *buf, size_t size,
 	start_time = muse_get_time();
 	
 	muse_convert_to_access_path(access_path, path);
-	fd = open(access_path, O_WRONLY);
+	/*fd = open(access_path, O_WRONLY);
 	if (fd == -1)
-		return -errno;
+		return -errno;*/
 
 	res = pwrite(fd, buf, size, offset);
 	if (res == -1)
@@ -345,7 +346,7 @@ static int muse_write(const char *path, const char *buf, size_t size,
 	duration_time = muse_get_time() - start_time;
 	muse_log_write(fuse_get_context()->pid, access_path, offset, res, "w", duration_time);
 
-	close(fd);
+	//close(fd);
 	return res;
 }
 
@@ -377,6 +378,8 @@ static int muse_release(const char *path, struct fuse_file_info *fi)
 	duration_time = muse_get_time() - start_time;
 	muse_log_write(fuse_get_context()->pid, access_path, 0, 0, "c", duration_time);
 
+	//close fd;
+	close(fi->fh);
 	(void) path;
 	(void) fi;
 	return 0;
