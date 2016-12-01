@@ -19,6 +19,7 @@
 #include <dirent.h>
 #include <errno.h>
 #include <sys/time.h>
+#include <linux/limits.h>
 
 #ifdef HAVE_SETXATTR
 #include <sys/xattr.h>
@@ -173,10 +174,14 @@ static int muse_symlink(const char *from, const char *to)
 {
 	int res;
 
-	char ato[256] = ".";
+	char afrom[PATH_MAX];
+	char ato[PATH_MAX];
+	strcpy(afrom, mount_point);
+	strcpy(ato, mount_point);
+	strcat(afrom, from);
 	strcat(ato, to);
 
-	res = symlink(from, ato);
+	res = symlink(afrom, ato);
 	if (res == -1)
 		return -errno;
 
@@ -187,12 +192,14 @@ static int muse_rename(const char *from, const char *to)
 {
 	int res;
 
-	char afrom[256]=".";
-	char ato[256]=".";
+	char afrom[PATH_MAX];
+	char ato[PATH_MAX];
+	strcpy(afrom, mount_point);
+	strcpy(ato, mount_point);
 	strcat(afrom, from);
 	strcat(ato, to);
 
-	res = rename(from, to);
+	res = rename(afrom, ato);
 	if (res == -1)
 		return -errno;
 
@@ -203,8 +210,10 @@ static int muse_link(const char *from, const char *to)
 {
 	int res;
 
-	char afrom[256]=".";
-	char ato[256]=".";
+	char afrom[PATH_MAX];
+	char ato[PATH_MAX];
+	strcpy(afrom, mount_point);
+	strcpy(ato, mount_point);
 	strcat(afrom, from);
 	strcat(ato, to);
 
