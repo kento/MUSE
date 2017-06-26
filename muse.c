@@ -41,9 +41,15 @@ static int muse_getattr(const char *path, struct stat *stbuf)
 {
 	int res;
 	char access_path[256];
+	double start_time, duration_time;
 	
 	muse_convert_to_access_path(access_path, path);
+
+	start_time = muse_get_time();
 	res = lstat(access_path, stbuf);
+	duration_time = muse_get_time() - start_time;
+	muse_log_write(fuse_get_context()->pid, access_path, 0, 0, "s", duration_time);
+
 	if (res == -1)
 		return -errno;
 
@@ -54,9 +60,14 @@ static int muse_access(const char *path, int mask)
 {
 	int res;
 	char access_path[256];
+	double start_time, duration_time;
 	
+	start_time = muse_get_time();
 	muse_convert_to_access_path(access_path, path);
 	res = access(access_path, mask);
+
+	duration_time = muse_get_time() - start_time;
+	muse_log_write(fuse_get_context()->pid, access_path, 0, 0, "a", duration_time);
 	if (res == -1)
 		return -errno;
 
@@ -67,9 +78,15 @@ static int muse_readlink(const char *path, char *buf, size_t size)
 {
 	int res;
 	char access_path[256];
+	double start_time, duration_time;
 	
+	start_time = muse_get_time();
 	muse_convert_to_access_path(access_path, path);
 	res = readlink(access_path, buf, size - 1);
+
+	duration_time = muse_get_time() - start_time;
+	muse_log_write(fuse_get_context()->pid, access_path, 0, 0, "rl", duration_time);
+
 	if (res == -1)
 		return -errno;
 
@@ -88,7 +105,9 @@ static int muse_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 	(void) fi;
 
 	char access_path[256];
+	double start_time, duration_time;
 	
+	start_time = muse_get_time();
 	muse_convert_to_access_path(access_path, path);
 
 	dp = opendir(access_path);
@@ -105,6 +124,9 @@ static int muse_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 	}
 
 	closedir(dp);
+
+	duration_time = muse_get_time() - start_time;
+	muse_log_write(fuse_get_context()->pid, access_path, 0, 0, "d", duration_time);
 	return 0;
 }
 
@@ -135,9 +157,14 @@ static int muse_mkdir(const char *path, mode_t mode)
 {
 	int res;
 	char access_path[256];
+	double start_time, duration_time;
 	
+	start_time = muse_get_time();
 	muse_convert_to_access_path(access_path, path);
 	res = mkdir(access_path, mode);
+
+	duration_time = muse_get_time() - start_time;
+	muse_log_write(fuse_get_context()->pid, access_path, 0, 0, "md", duration_time);
 	if (res == -1)
 		return -errno;
 
@@ -148,9 +175,14 @@ static int muse_unlink(const char *path)
 {
 	int res;
 	char access_path[256];
+	double start_time, duration_time;
 	
+	start_time = muse_get_time();
 	muse_convert_to_access_path(access_path, path);
 	res = unlink(access_path);
+
+	duration_time = muse_get_time() - start_time;
+	muse_log_write(fuse_get_context()->pid, access_path, 0, 0, "u", duration_time);
 	if (res == -1)
 		return -errno;
 
@@ -161,9 +193,15 @@ static int muse_rmdir(const char *path)
 {
 	int res;
 	char access_path[256];
+	double start_time, duration_time;
 	
+	start_time = muse_get_time();
+
 	muse_convert_to_access_path(access_path, path);
 	res = rmdir(access_path);
+
+	duration_time = muse_get_time() - start_time;
+	muse_log_write(fuse_get_context()->pid, access_path, 0, 0, "rd", duration_time);
 	if (res == -1)
 		return -errno;
 
@@ -194,12 +232,20 @@ static int muse_rename(const char *from, const char *to)
 
 	char afrom[PATH_MAX];
 	char ato[PATH_MAX];
+	double start_time, duration_time;
+	
+	start_time = muse_get_time();
+
 	strcpy(afrom, mount_point);
 	strcpy(ato, mount_point);
 	strcat(afrom, from);
 	strcat(ato, to);
 
 	res = rename(afrom, ato);
+
+	duration_time = muse_get_time() - start_time;
+	muse_log_write(fuse_get_context()->pid, ato, 0, 0, "rn", duration_time);
+
 	if (res == -1)
 		return -errno;
 
@@ -212,12 +258,20 @@ static int muse_link(const char *from, const char *to)
 
 	char afrom[PATH_MAX];
 	char ato[PATH_MAX];
+	double start_time, duration_time;
+
+	start_time = muse_get_time();
+
 	strcpy(afrom, mount_point);
 	strcpy(ato, mount_point);
 	strcat(afrom, from);
 	strcat(ato, to);
 
 	res = link(afrom, ato);
+
+	duration_time = muse_get_time() - start_time;
+	muse_log_write(fuse_get_context()->pid, ato, 0, 0, "l", duration_time);
+
 	if (res == -1)
 		return -errno;
 
@@ -255,9 +309,16 @@ static int muse_truncate(const char *path, off_t size)
 {
 	int res;
 	char access_path[256];
+	double start_time, duration_time;
+
+	start_time = muse_get_time();
 	
 	muse_convert_to_access_path(access_path, path);
 	res = truncate(access_path, size);
+
+	duration_time = muse_get_time() - start_time;
+	muse_log_write(fuse_get_context()->pid, access_path, 0, 0, "t", duration_time);
+
 	if (res == -1)
 		return -errno;
 
@@ -384,11 +445,12 @@ static int muse_release(const char *path, struct fuse_file_info *fi)
 	
 	muse_convert_to_access_path(access_path, path);
 
-	duration_time = muse_get_time() - start_time;
-	muse_log_write(fuse_get_context()->pid, access_path, 0, 0, "c", duration_time);
 
 	//close fd;
 	close(fi->fh);
+
+	duration_time = muse_get_time() - start_time;
+	muse_log_write(fuse_get_context()->pid, access_path, 0, 0, "c", duration_time);
 	(void) path;
 	(void) fi;
 	return 0;

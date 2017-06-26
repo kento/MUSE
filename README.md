@@ -50,6 +50,23 @@ Log format: (pid = 0 when close)
     1412899393.844634       0.000162        16067   r       muse_root_dir/muse_test2.tmp      0       372
     1412899393.844692       0.000002        0       c       muse_root_dir/muse_test2.tmp      0       0
 
+operations:
+	r  : read
+	w  : write
+	o  : open
+	c  : close
+	s  : get status
+	a  : access
+	rl : readlink
+	d  : readdir
+	md : mkdir
+	u  : unlink
+	rd : rmdir
+	rn : rename
+	l  : link
+	t  : truncate
+
+
 Usage
 -----------
 
